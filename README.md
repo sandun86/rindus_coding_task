@@ -5,17 +5,17 @@
 
 Install steps
     
-    1.Clone the code base
-    2.npm install
-    3.Make a copy of sample.env file as a .env (`cp sample.env .env`)
-    4.Make sure all the variables are created in .env
-    5.Create a Mysql database called `rindus` and run `db.sql` to create the table
-    6.Run `npm run dev` (service will be run on given port which in .env, example : http://localhost:3002)
-    7.Use the API documentation to check the APIs and called as well (http://localhost:3002/api-docs)
+    1. Clone the code base
+    2. Run `npm install`
+    3. Make a copy of sample.env file as a .env (`cp sample.env .env`)
+    4. Make sure all the variables are created in .env
+    5. Create a Mysql database called `rindus` and run `db.sql` to create the table
+    6. Run `npm run dev` (service will be run on given port which in .env, example: http://localhost:3002)
+    7. Use the API documentation to check the APIs and calls as well (http://localhost:3002/api-docs)
 
 ----------  
-[Swagger API Documentation](http://localhost:3002/api-docs)
-## NPM scripts
+[Swagger API Documentation](http://localhost:3002/api-docs) : (http://localhost:3002/api-docs)
+### NPM scripts
 
 - `npm run build` - build application
 - `npm start`     - run application
@@ -24,8 +24,8 @@ Install steps
 ----------
 
 
-## Create a user - run this curl command
-
+#### Create a user - run this curl command
+```bash
 curl -X 'POST' \
   'http://localhost:3002/users' \
   -H 'accept: */*' \
@@ -35,9 +35,10 @@ curl -X 'POST' \
   "email": "alex1@rindus.com",
   "age": 12
 }'
-
-## Fetch a user - run this curl command
-
+```
+#### Fetch a user - run this curl command
+```bash
 curl -X 'GET' \
   'http://localhost:3002/users/1' \
   -H 'accept: */*'
+```
