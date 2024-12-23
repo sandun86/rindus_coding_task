@@ -1,0 +1,7 @@
+CREATE TABLE `users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `age` INT NOT NULL,
+  `status` TINYINT(11) NULL DEFAULT 1,
+  PRIMARY KEY (`id`));
