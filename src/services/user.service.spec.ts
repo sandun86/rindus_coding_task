@@ -1,7 +1,8 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { connection } from "../config/db";
 import userService from "../services/user.service";
-import { CreateUserData } from "../types/user.types";
+import { CreatedUser, CreateUserData, User } from "../types/user.types";
+import userModel from "../models/user.models";
 
 // Mock connection
 jest.mock("../config/db", () => ({
@@ -18,101 +19,62 @@ describe("User Service", () => {
     describe("createUser", () => {
         it("should insert a new user and return the user ID", async () => {
             const mockData: CreateUserData = { name: "Alex", email: "alex@rindus.com", age: 30 };
-            const mockResult: ResultSetHeader = { insertId: 1 } as ResultSetHeader;
 
-            (connection.execute as jest.Mock) = jest.fn().mockResolvedValueOnce([mockResult]);
+            (userModel.getUserByEmail as jest.Mock) = jest.fn()
+                .mockResolvedValue(null);
+            (userModel.create as jest.Mock) = jest.fn()
+                .mockResolvedValue({ id: 1 } as CreatedUser);
 
             // Action
             const result = await userService.createUser(mockData);
 
             // Assert
-            expect(connection.execute).toHaveBeenCalledWith(
-                `INSERT INTO users (name, email, age) VALUES (?, ?, ?)`,
-                [mockData.name, mockData.email, mockData.age]
-            );
-            expect(result).toEqual({ id: 1 });
+            expect(result.statusCode).toEqual(201);
+        });
+
+        it("should return the user already exit", async () => {
+            const mockData: CreateUserData = { name: "Alex", email: "alex@rindus.com", age: 30 };
+
+            (userModel.getUserByEmail as jest.Mock) = jest.fn()
+                .mockResolvedValue({ id: 1, name: "Alex", email: "alex@rindus.com", age: 30 } as User);
+            (userModel.create as jest.Mock) = jest.fn()
+                .mockResolvedValue({ id: 1 } as CreatedUser);
+
+            // Action
+            const result = await userService.createUser(mockData);
+
+            // Assert
+            expect(result.statusCode).toEqual(409);
         });
     });
 
     describe("getUserById", () => {
         it("should return a user if the user exists", async () => {
-            const mockUser: RowDataPacket[] = [
-                { id: 1, name: "Alex", email: "alex@rindus.com", age: 30 } as RowDataPacket,
-            ];
+            const mockUser = { id: 1, name: "Alex", email: "alex@rindus.com", age: 30 } as User;
 
-            (connection.execute as jest.Mock) = jest.fn().mockResolvedValueOnce([mockUser]);
+            (userModel.getUserById as jest.Mock) = jest.fn().mockResolvedValueOnce(mockUser as User);
 
             // Action
-            const result = await userService.getUserById(1);
+            const result = await userService.getUserById(mockUser.id);
 
             // Assert
-            expect(connection.execute).toHaveBeenCalledWith(
-                `SELECT id, name, email, age FROM users WHERE id = ? AND status = 1`,
-                [1]
-            );
-            expect(result).toEqual({
-                id: 1,
-                name: "Alex",
-                email: "alex@rindus.com",
-                age: 30,
-            });
+            expect(result.status).toEqual(true);
+            expect(result.statusCode).toEqual(200);
+            expect(result.data).toEqual(mockUser);
         });
 
         it("should return null if the user does not exist", async () => {
-            const mockUser: RowDataPacket[] = [];
+            const mockUser = { id: 1, name: "Alex", email: "alex@rindus.com", age: 30 } as User;
 
-            (connection.execute as jest.Mock) = jest.fn().mockResolvedValueOnce([mockUser]);
-
-            // Action
-            const result = await userService.getUserById(1);
-
-            // Assert
-            expect(connection.execute).toHaveBeenCalledWith(
-                `SELECT id, name, email, age FROM users WHERE id = ? AND status = 1`,
-                [1]
-            );
-            expect(result).toBeNull();
-        });
-    });
-
-    describe("getUserByEmail", () => {
-        it("should return a user if the email exists", async () => {
-            const mockUser: RowDataPacket[] = [
-                { id: 1, name: "Alex", email: "alex@rindus.com", age: 30 } as RowDataPacket,
-            ];
-
-            (connection.execute as jest.Mock) = jest.fn().mockResolvedValueOnce([mockUser]);
+            (userModel.getUserById as jest.Mock) = jest.fn().mockResolvedValueOnce(null);
 
             // Action
-            const result = await userService.getUserByEmail("alex@rindus.com");
+            const result = await userService.getUserById(mockUser.id);
 
             // Assert
-            expect(connection.execute).toHaveBeenCalledWith(
-                `SELECT id, name, email, age FROM users WHERE email = ? AND status = 1`,
-                ["alex@rindus.com"]
-            );
-            expect(result).toEqual({
-                id: 1,
-                name: "Alex",
-                email: "alex@rindus.com",
-                age: 30,
-            });
-        });
-
-        it("should return null if the email does not exist", async () => {
-            const mockUser: RowDataPacket[] = [];
-
-            (connection.execute as jest.Mock) = jest.fn().mockResolvedValueOnce([mockUser]);
-
-            // Action
-            const result = await userService.getUserByEmail("alex@rindus.com");
-
-            // Assert
-            expect(connection.execute).toHaveBeenCalledWith(
-                `SELECT id, name, email, age FROM users WHERE email = ? AND status = 1`,
-                ["alex@rindus.com"]
-            );
-            expect(result).toBeNull();
+            expect(result.status).toEqual(false);
+            expect(result.statusCode).toEqual(404);
+            expect(result.data).toEqual(null);
         });
     });
 });
