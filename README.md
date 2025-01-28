@@ -32,7 +32,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "name": "Alex Smith",
-  "email": "alex1@rindus.com",
+  "email": "alex1234@rindus.com",
   "age": 12
 }'
 ```
@@ -41,4 +41,3 @@ curl -X 'POST' \
 curl -X 'GET' \
   'http://localhost:3002/users/1' \
   -H 'accept: */*'
-```
